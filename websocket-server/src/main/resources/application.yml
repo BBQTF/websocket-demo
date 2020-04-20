@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: websocket-server
+  #mysql
+  datasource:
+    username: root
+    password: 1q@W#E4r
+    url: jdbc:mysql://123.56.141.39:3306/bbq
+  #redis
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+server:
+  port: 8092
+
+mybatis:
+  mapper-locations: classpath:com/bbq/websocketserver/mapper/*.xml
+
+
+
