@@ -60,11 +60,10 @@ public class MyWebSocket {
     public void onOpen(Session session, @PathParam(value = "userId") String userId, EndpointConfig config) {
         this.session = session;
         this.userId = userId;
-        websocketMap.put(userId, this);     //加入set中
-        addOnlineCount();           //在线数加1
-        System.out.println(session);
-        System.out.println(userId);
-        System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
+        websocketMap.put(userId, this); //加入map中
+        addOnlineCount(); //在线数加1
+        logger.info("客户端----：" + userId + "加入连接");
+        logger.info("有新连接加入！当前在线人数为" + getOnlineCount());
         // 获取httpSession
         this.httpSession = (HttpSession) config.getUserProperties().get(HttpSession.class.getName());
         if (httpSession != null) {
