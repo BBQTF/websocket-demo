@@ -75,7 +75,7 @@ public class MyWebSocket {
             msgRecordService = context.getBean(MsgRecordService.class);
         }
         // 验证当前用户身份
-        boolean customer = "5".equals(userId); //如果是客户身份
+        boolean customer = "5".equals(userId); //如果是客户身份 TODO 获取用户session中的角色标识
         if (customer) {
             // 验证当前用户会话是否已有客服处理
             // 根据客户id获取客服id
@@ -83,7 +83,7 @@ public class MyWebSocket {
             MessageDto messageDto = new MessageDto();
             if (serviceId == null) {
                 // 查询当前处理会话数最低的客服userId
-                String lowestServiceId = "test"; // TODO 暂时写死
+                String lowestServiceId = "test"; // TODO 暂时写死，应从redis或数据库中获取
                 // 为客户分配对应的客服
                 messageDto.setUserId(lowestServiceId);
                 this.AppointSending(userId, JSON.toJSONString(messageDto));
@@ -107,6 +107,8 @@ public class MyWebSocket {
     }
 
     /**
+     * 客户端消息分发处理
+     *
      * @param message
      */
     @OnMessage
@@ -139,7 +141,10 @@ public class MyWebSocket {
     }
 
     /**
-     * 指定发送
+     * 指定客户端发送消息
+     *
+     * @param userId 接收方用户客户端标识
+     * @param message 消息
      */
     public void AppointSending(String userId, String message) {
         try {
