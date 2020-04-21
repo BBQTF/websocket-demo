@@ -5,7 +5,7 @@
         <result column="id" property="id" jdbcType="VARCHAR"/>
         <result column="customer_id" property="customerId" jdbcType="VARCHAR"/>
         <result column="service_id" property="serviceId" jdbcType="VARCHAR"/>
-        <result column="record_time" property="recordTime" jdbcType="LONG"/>
+        <result column="record_time" property="recordTime" jdbcType="BIGINT"/>
     </resultMap>
     <!--插入留言记录-->
     <insert id="saveMsgRecord" parameterType="com.bbq.websocketserver.entity.MsgRecord">
@@ -31,7 +31,7 @@
                 #{serviceId, jdbcType=VARCHAR},
             </if>
             <if test="recordTime != null">
-                #{recordTime, jdbcType=LONG},
+                #{recordTime, jdbcType=BIGINT},
             </if>
         </trim>
     </insert>
