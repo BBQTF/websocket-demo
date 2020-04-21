@@ -34,7 +34,7 @@ public class ChatInfoController {
     }
 
     @GetMapping("/confirmMsgCount")
-    @ApiOperation("确认客户端收到留言") // TODO 未做完整性验证
+    @ApiOperation("确认客户端收到留言") // TODO 未做完整性验证，应接收消息id列表
     public void confirmMsgCount(@RequestParam String userId, @RequestParam Integer count){
         chatService.confirmMsgCount(userId, count);
     }
