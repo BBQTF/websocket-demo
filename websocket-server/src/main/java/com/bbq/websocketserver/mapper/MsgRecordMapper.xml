@@ -3,44 +3,61 @@
 <mapper namespace="com.bbq.websocketserver.mapper.MsgRecordMapper">
     <resultMap id="msgRecord" type="com.bbq.websocketserver.entity.MsgRecord">
         <result column="id" property="id" jdbcType="VARCHAR"/>
-        <result column="customer_id" property="customerId" jdbcType="VARCHAR"/>
-        <result column="service_id" property="serviceId" jdbcType="VARCHAR"/>
+        <result column="own_id" property="ownId" jdbcType="VARCHAR"/>
+        <result column="other_id" property="otherId" jdbcType="VARCHAR"/>
+        <result column="message" property="message" jdbcType="VARCHAR"/>
         <result column="record_time" property="recordTime" jdbcType="BIGINT"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
     </resultMap>
     <!--插入留言记录-->
     <insert id="saveMsgRecord" parameterType="com.bbq.websocketserver.entity.MsgRecord">
         insert into leave_msg
         <trim prefix="(" suffix=")" suffixOverrides=",">
             id,
-            <if test="customerId != null">
-                customer_id,
+            <if test="ownId != null">
+                own_id,
             </if>
-            <if test="serviceId != null">
-                service_id,
+            <if test="otherId != null">
+                other_id,
+            </if>
+            <if test="message != null">
+                message,
             </if>
             <if test="recordTime != null">
                 record_time,
             </if>
+            status,
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             #{id,jdbcType=VARCHAR},
-            <if test="customerId != null">
-                #{customerId, jdbcType=VARCHAR},
+            <if test="ownId != null">
+                #{ownId, jdbcType=VARCHAR},
             </if>
-            <if test="serviceId != null">
-                #{serviceId, jdbcType=VARCHAR},
+            <if test="otherId != null">
+                #{otherId, jdbcType=VARCHAR},
+            </if>
+            <if test="message != null">
+                #{message, jdbcType=VARCHAR},
             </if>
             <if test="recordTime != null">
                 #{recordTime, jdbcType=BIGINT},
             </if>
+            #{status, jdbcType=INTEGER},
         </trim>
     </insert>
 
     <!--查询聊天记录-->
     <select id="queryMsgRecord" parameterType="com.bbq.websocketserver.dto.QueryMsgRecordDto" resultMap="msgRecord">
-        select id, customer_id, service_id, record_time
+        select id, own_id, other_id, message, record_time
         from msg_record
-        where customer_id = #{customerId} and service_id = #{serviceId}
+        where own_id = #{ownId} and other_id = #{otherId}
+        <if test="startTime != null and endTime != null">
+            and record_time between #{startTime} and #{endTime}
+        </if>
+        union
+        select id, own_id, other_id, message, record_time
+        from msg_record
+        where own_id = #{otherId} and other_id = #{ownId}
         <if test="startTime != null and endTime != null">
             and record_time between #{startTime} and #{endTime}
         </if>

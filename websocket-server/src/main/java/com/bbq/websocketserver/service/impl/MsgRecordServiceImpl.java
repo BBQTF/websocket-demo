@@ -43,7 +43,7 @@ public class MsgRecordServiceImpl implements MsgRecordService {
     }
 
     /**
-     * 获取消息
+     * 获取redis中的离线消息
      *
      * @param ownId
      * @param otherId
@@ -56,8 +56,7 @@ public class MsgRecordServiceImpl implements MsgRecordService {
         List<Object> objectMsg = RedisUtils.lGet(lLey, 0, -1);
         if (CollectionUtils.isEmpty(objectMsg)) {
             List<MsgRecord> msgRecordList = (List<MsgRecord>) (List) objectMsg;
-            // 缓存留言
-            RedisUtils.llSet(lLey, msgRecordList);
+            return msgRecordList;
         }
         return null;
     }

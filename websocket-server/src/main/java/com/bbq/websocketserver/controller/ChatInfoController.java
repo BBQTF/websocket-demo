@@ -25,7 +25,7 @@ public class ChatInfoController {
     MsgRecordService msgRecordService;
 
     @GetMapping("/getLeaveMsg")
-    @ApiOperation("获取留言")
+    @ApiOperation("获取redis中的离线消息")
     public ApiResponse  getLeaveMsg(@RequestParam String ownId,@RequestParam String otherId){
         try{
            return new ApiResponse<List<MsgRecord>>(msgRecordService.getLeaveMsg(ownId, otherId));

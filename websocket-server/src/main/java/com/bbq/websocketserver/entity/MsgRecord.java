@@ -12,7 +12,22 @@ import lombok.Data;
 @Data
 public class MsgRecord {
     private String id;
-    private String customerId;
-    private String serviceId;
+    private String ownId;
+    private String otherId;
+    private String message;
     private Long recordTime;
+    private Integer status;
+
+    public MsgRecord() {
+        super();
+    }
+
+    public MsgRecord(String id, String ownId, String otherId, String message, Long recordTime, Integer status) {
+        this.id = id;
+        this.ownId = ownId;
+        this.otherId = otherId;
+        this.message = message;
+        this.recordTime = recordTime;
+        this.status = status == null ? 0 : status;
+    }
 }

@@ -23,4 +23,12 @@ public interface MsgRecordService {
      * @return
      */
     List<MsgRecord> queryMsgRecord(QueryMsgRecordDto dto);
+
+    /**
+     * 获取redis中的离线消息
+     * @param ownId
+     * @param otherId
+     * @return
+     */
+    List<MsgRecord> getLeaveMsg(String ownId, String otherId);
 }
