@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 // 该注解用来指定一个URI，客户端可以通过这个URI来连接到WebSocket
 public class MyWebSocket {
 
-    //静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
+    //静态变量，用来记录当前在线连接数
     private static int onlineCount = 0;
 
     //根据用户标识存放每个客户端对应的MyWebSocket对象
@@ -96,12 +96,12 @@ public class MyWebSocket {
     }
 
     /**
-     * 连接关闭调用的方法
+     * 连接关闭时调用的方法
      */
     @OnClose
     public void onClose() {
-        websocketMap.remove(this);  //从set中删除
-        subOnlineCount();           //在线数减1
+        websocketMap.remove(this);  //从map中删除
+        subOnlineCount();  //在线数减1
         System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
     }
 
@@ -128,7 +128,8 @@ public class MyWebSocket {
             msgRecord.setServiceId(messageDto.getUserId());
             msgRecord.setRecordTime(new Date().getTime());
             msgRecordService.saveMsgRecord(msgRecord);
-        } catch (NullPointerException e) {
+        } /**防止接收方下线，无法正常推送消息，将消息定义为留言*/
+        catch (NullPointerException e) {
             logger.info("你好，对方已离线，请留言");
             setLeaveMsg(messageDto.getUserId(), messageDto);
             AppointSending(userId, JSON.toJSONString(new MessageDto("你好，对方已离线，请留言")));
