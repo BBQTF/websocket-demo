@@ -38,10 +38,10 @@ public class ApiResponse<T> implements Serializable {
         this.data = data;
     }
 
-    public T data() throws ToBankException {
+    public T data() throws BBQException {
         if (this.code == ResultStatusEnum.SUCCESS.getResultCode()) {
             return this.data;
         }
-        throw new ToBankException(this.code, this.message);
+        throw new BBQException(this.code, this.message);
     }
 }

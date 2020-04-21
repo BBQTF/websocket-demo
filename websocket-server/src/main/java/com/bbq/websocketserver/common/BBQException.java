@@ -2,7 +2,7 @@ package com.bbq.websocketserver.common;
 
 import lombok.Getter;
 
-public class ToBankException extends RuntimeException {
+public class BBQException extends RuntimeException {
 
     @Getter
     private ResultStatusEnum resultStatusEnum;
@@ -12,14 +12,14 @@ public class ToBankException extends RuntimeException {
     private String resultMsg;
 
 
-    public ToBankException(ResultStatusEnum errorCode) {
+    public BBQException(ResultStatusEnum errorCode) {
         super(errorCode.getResultMsg());
         this.resultCode = errorCode.getResultCode();
         this.resultMsg = errorCode.getResultMsg();
         this.resultStatusEnum = errorCode;
     }
 
-    public ToBankException(int resultCode, String resultMsg) {
+    public BBQException(int resultCode, String resultMsg) {
         super(resultMsg);
         this.resultCode = resultCode;
         this.resultMsg = resultMsg;
