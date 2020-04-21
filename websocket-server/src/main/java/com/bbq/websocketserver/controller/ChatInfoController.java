@@ -1,6 +1,7 @@
 package com.bbq.websocketserver.controller;
 
 import com.bbq.websocketserver.common.ApiResponse;
+import com.bbq.websocketserver.common.ResultStatusEnum;
 import com.bbq.websocketserver.dto.QueryMsgRecordDto;
 import com.bbq.websocketserver.entity.LeaveMsg;
 import com.bbq.websocketserver.entity.MsgRecord;
@@ -29,19 +30,33 @@ public class ChatInfoController {
 
     @GetMapping("/getLeaveMsg")
     @ApiOperation("获取留言")
-    public ApiResponse<List<LeaveMsg>> getLeaveMsg(@RequestParam String userId){
-        return new ApiResponse<List<LeaveMsg>>(chatService.getLeaveMsg(userId));
+    public ApiResponse  getLeaveMsg(@RequestParam String userId){
+        try{
+           return new ApiResponse<List<LeaveMsg>>(chatService.getLeaveMsg(userId));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ApiResponse<>(ResultStatusEnum.SYSTEM_ERROR);
+        }
     }
 
     @GetMapping("/confirmMsgCount")
     @ApiOperation("确认客户端收到留言") // TODO 未做完整性验证，应接收消息id列表
     public void confirmMsgCount(@RequestParam String userId, @RequestParam Integer count){
-        chatService.confirmMsgCount(userId, count);
+        try{
+            chatService.confirmMsgCount(userId, count);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @PostMapping("/queryMsgRecord")
     @ApiOperation("查询聊天记录")
-    public ApiResponse<List<MsgRecord>> queryMsgRecord(@RequestBody QueryMsgRecordDto dto){
-        return new ApiResponse<List<MsgRecord>>(msgRecordService.queryMsgRecord(dto));
+    public ApiResponse queryMsgRecord(@RequestBody QueryMsgRecordDto dto){
+        try {
+            return new ApiResponse<List<MsgRecord>>(msgRecordService.queryMsgRecord(dto));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ApiResponse<>(ResultStatusEnum.SYSTEM_ERROR);
+        }
     }
 }
