@@ -3,9 +3,7 @@ package com.bbq.websocketserver.config;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.bbq.websocketserver.common.utils.RedisUtils;
-import com.bbq.websocketserver.entity.LeaveMsg;
 import com.bbq.websocketserver.entity.MsgRecord;
-import com.bbq.websocketserver.service.ChatService;
 import com.bbq.websocketserver.service.MsgRecordService;
 import com.bbq.websocketserver.service.UserService;
 import com.bbq.websocketserver.dto.MessageDto;
@@ -46,7 +44,6 @@ public class MyWebSocket {
     private Session session;
     private String userId;
     private UserService userService;
-    private ChatService chatService;
     private MsgRecordService msgRecordService;
     private HttpSession httpSession;
     private final static Logger logger = LoggerFactory.getLogger(MyWebSocket.class);
@@ -70,7 +67,6 @@ public class MyWebSocket {
             ApplicationContext context = WebApplicationContextUtils.getRequiredWebApplicationContext(httpSession.getServletContext());
             // 获取service
             userService = context.getBean(UserService.class);
-            chatService = context.getBean(ChatService.class);
             msgRecordService = context.getBean(MsgRecordService.class);
         }
         // 验证当前用户身份
@@ -93,6 +89,8 @@ public class MyWebSocket {
                 this.AppointSending(userId, JSON.toJSONString(messageDto));
             }
         }
+        /**替代请求接口获取离线时消息的方案，更新为客户端连接时自动推送*/
+        // 获取当前用户的离线消息
     }
 
     /**
@@ -113,29 +111,23 @@ public class MyWebSocket {
     @OnMessage
     public void sending(String message) {
         // 解析消息
-        MessageDto messageDto = JSONObject.parseObject(message, MessageDto.class);
+        MsgRecord msgRecord = transToMsgRecord(message);
         try {
-            System.out.println("收到客户端消息" + message);
-            // 指定userId发送消息&&也将自己的userId保存在toMessage中发送给对方
-            MessageDto toMessage = new MessageDto();
-            toMessage.setUserId(userId);
-            toMessage.setMessage(messageDto.getMessage());
-            AppointSending(messageDto.getUserId(), JSON.toJSONString(toMessage));
+            logger.info("收到客户端传来的消息---：" + message);
+            // 指定userId发送消息&&也将自己的userId保存在messageDto中发送给对方
+            MessageDto messageDto = new MessageDto();
+            messageDto.setUserId(userId);
+            messageDto.setMessage(msgRecord.getMessage());
+            AppointSending(msgRecord.getOtherId(), JSON.toJSONString(messageDto));
             // 消息数据入库
-            MsgRecord msgRecord = new MsgRecord();
-            msgRecord.setId(UUID.randomUUID().toString());
-            msgRecord.setCustomerId(userId);
-            msgRecord.setServiceId(messageDto.getUserId());
-            msgRecord.setRecordTime(new Date().getTime());
             msgRecordService.saveMsgRecord(msgRecord);
-        } /**防止接收方下线，无法正常推送消息，将消息定义为留言*/
-        catch (NullPointerException e) {
+        } /**防止接收方下线，无法正常推送消息，将消息定义为留言*/ catch (NullPointerException e) {
             logger.info("你好，对方已离线，请留言");
-            setLeaveMsg(messageDto.getUserId(), messageDto);
+            setLeaveMsg(msgRecord);
             AppointSending(userId, JSON.toJSONString(new MessageDto("你好，对方已离线，请留言")));
         } catch (IllegalStateException e) {
             logger.error("你好，对方已离线，请留言");
-            setLeaveMsg(messageDto.getUserId(), messageDto);
+            setLeaveMsg(msgRecord);
             AppointSending(userId, JSON.toJSONString(new MessageDto("你好，对方已离线，请留言")));
         }
     }
@@ -143,7 +135,7 @@ public class MyWebSocket {
     /**
      * 指定客户端发送消息
      *
-     * @param userId 接收方用户客户端标识
+     * @param userId  接收方用户客户端标识
      * @param message 消息
      */
     public void AppointSending(String userId, String message) {
@@ -155,27 +147,42 @@ public class MyWebSocket {
     }
 
     /**
-     * 设置留言
+     * 解析消息
      *
-     * @param userId
-     * @param messageDto
+     * @param message
      * @return
      */
-    private List<LeaveMsg> setLeaveMsg(String userId, MessageDto messageDto) {
-        // 组装redis中的list"容器"的key值
-        String lUserId = "l" + userId;
-        List<Object> objectMsg = RedisUtils.lGet(lUserId, 0, -1);
-        if (CollectionUtils.isEmpty(objectMsg)) {
-            List<LeaveMsg> leaveMsgList = new ArrayList<>();
-            // 创建留言记录
-            LeaveMsg leaveMsg = new LeaveMsg(UUID.randomUUID().toString(), userId, messageDto.getMessage(), new Date().getTime(), null);
-            leaveMsgList.add(leaveMsg);
-            // 缓存留言
-            RedisUtils.llSet(lUserId, leaveMsgList);
-            // 数据入库
-            chatService.saveLeaveMsg(leaveMsg);
+    private MsgRecord transToMsgRecord(String message) {
+        try {
+            MessageDto messageDto = JSONObject.parseObject(message, MessageDto.class);
+            MsgRecord msgRecord = new MsgRecord();
+            msgRecord.setId(UUID.randomUUID().toString());
+            msgRecord.setOwnId(userId);
+            msgRecord.setOtherId(messageDto.getUserId());
+            msgRecord.setMessage(messageDto.getMessage());
+            msgRecord.setRecordTime(new Date().getTime());
+            return msgRecord;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        return null;
+    }
+
+    /**
+     * 设置留言
+     *
+     * @param msgRecord
+     */
+    private void setLeaveMsg(MsgRecord msgRecord) {
+        // 组装redis中的list"容器"的key值 l + 接收方id + 自己的id
+        String lLey = "l" + msgRecord.getOtherId() + userId;
+        List<Object> objectMsg = RedisUtils.lGet(lLey, 0, -1);
+        if (CollectionUtils.isEmpty(objectMsg)) {
+            List<MsgRecord> msgRecordList = new ArrayList<>();
+            msgRecordList.add(msgRecord);
+            // 缓存留言
+            RedisUtils.llSet(lLey, msgRecordList);
+        }
     }
 
     /**
