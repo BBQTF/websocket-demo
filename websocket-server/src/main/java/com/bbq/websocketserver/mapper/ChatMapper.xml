@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bbq.websocketserver.mapper.ChatMapper">
+    <resultMap id="leaveMsg" type="com.bbq.websocketserver.entity.LeaveMsg">
+        <result column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="message" property="message" jdbcType="VARCHAR"/>
+        <result column="record_time" property="recordTime" jdbcType="LONG"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+    </resultMap>
+    <!--插入留言记录-->
+    <insert id="saveLeaveMsg" parameterType="com.bbq.websocketserver.entity.LeaveMsg">
+        insert into leave_msg
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="message != null">
+                message,
+            </if>
+            <if test="recordTime != null">
+                record_time,
+            </if>
+            status,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{id,jdbcType=VARCHAR},
+            <if test="userId != null">
+                #{userId, jdbcType=VARCHAR},
+            </if>
+            <if test="message != null">
+                #{message, jdbcType=VARCHAR},
+            </if>
+            <if test="recordTime != null">
+                #{recordTime, jdbcType=LONG},
+            </if>
+            #{status, jdbcType=INTEGER},
+        </trim>
+    </insert>
+
+    <!--更新留言状态-->
+    <update id="updateStatus" parameterType="string">
+        update leave_msg set status = #{status}
+    </update>
+</mapper>

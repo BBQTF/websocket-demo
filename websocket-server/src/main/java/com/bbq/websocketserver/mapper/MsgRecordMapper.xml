@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bbq.websocketserver.mapper.MsgRecordMapper">
+    <resultMap id="msgRecord" type="com.bbq.websocketserver.entity.MsgRecord">
+        <result column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="customer_id" property="customerId" jdbcType="VARCHAR"/>
+        <result column="service_id" property="serviceId" jdbcType="VARCHAR"/>
+        <result column="record_time" property="recordTime" jdbcType="LONG"/>
+    </resultMap>
+    <!--插入留言记录-->
+    <insert id="saveMsgRecord" parameterType="com.bbq.websocketserver.entity.MsgRecord">
+        insert into leave_msg
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            <if test="customerId != null">
+                customer_id,
+            </if>
+            <if test="serviceId != null">
+                service_id,
+            </if>
+            <if test="recordTime != null">
+                record_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{id,jdbcType=VARCHAR},
+            <if test="customerId != null">
+                #{customerId, jdbcType=VARCHAR},
+            </if>
+            <if test="serviceId != null">
+                #{serviceId, jdbcType=VARCHAR},
+            </if>
+            <if test="recordTime != null">
+                #{recordTime, jdbcType=LONG},
+            </if>
+        </trim>
+    </insert>
+
+    <!--查询聊天记录-->
+    <select id="queryMsgRecord" parameterType="com.bbq.websocketserver.dto.QueryMsgRecordDto" resultMap="msgRecord">
+        select id, customer_id, service_id, record_time
+        from msg_record
+        where customer_id = #{customerId} and service_id = #{serviceId}
+        <if test="startTime != null and endTime != null">
+            and record_time between #{startTime} and #{endTime}
+        </if>
+    </select>
+</mapper>

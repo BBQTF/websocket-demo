@@ -1,6 +1,7 @@
 package com.bbq.websocketserver.service;
 
-import com.bbq.websocketserver.common.dto.MessageDto;
+import com.bbq.websocketserver.dto.MessageDto;
+import com.bbq.websocketserver.entity.LeaveMsg;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface ChatService {
      * @param userId
      * @return
      */
-    List<MessageDto> getLeaveMsg(String userId);
+    List<LeaveMsg> getLeaveMsg(String userId);
 
     /**
      * 确认客户端收到消息
@@ -24,4 +25,18 @@ public interface ChatService {
      * @param count
      */
     void confirmMsgCount(String userId, Integer count);
+
+    /**
+     * 留言信息入库
+     *
+     * @param leaveMsg
+     */
+    void saveLeaveMsg(LeaveMsg leaveMsg);
+
+    /**
+     * 更新留言状态
+     *
+     * @param status
+     */
+    void updateStatus(String status);
 }

@@ -1,4 +1,4 @@
-package com.bbq.websocketserver.common.dto;
+package com.bbq.websocketserver.dto;
 
 import lombok.Data;
 

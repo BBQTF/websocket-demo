@@ -2,10 +2,13 @@ package com.bbq.websocketserver.config;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.bbq.websocketserver.common.dto.MessageDto;
 import com.bbq.websocketserver.common.utils.RedisUtils;
+import com.bbq.websocketserver.entity.LeaveMsg;
 import com.bbq.websocketserver.entity.MsgRecord;
+import com.bbq.websocketserver.service.ChatService;
+import com.bbq.websocketserver.service.MsgRecordService;
 import com.bbq.websocketserver.service.UserService;
+import com.bbq.websocketserver.dto.MessageDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -43,6 +46,8 @@ public class MyWebSocket {
     private Session session;
     private String userId;
     private UserService userService;
+    private ChatService chatService;
+    private MsgRecordService msgRecordService;
     private HttpSession httpSession;
     private final static Logger logger = LoggerFactory.getLogger(MyWebSocket.class);
 
@@ -66,6 +71,8 @@ public class MyWebSocket {
             ApplicationContext context = WebApplicationContextUtils.getRequiredWebApplicationContext(httpSession.getServletContext());
             // 获取service
             userService = context.getBean(UserService.class);
+            chatService = context.getBean(ChatService.class);
+            msgRecordService = context.getBean(MsgRecordService.class);
         }
         // 验证当前用户身份
         boolean customer = "5".equals(userId); //如果是客户身份
@@ -113,13 +120,14 @@ public class MyWebSocket {
             toMessage.setUserId(userId);
             toMessage.setMessage(messageDto.getMessage());
             AppointSending(messageDto.getUserId(), JSON.toJSONString(toMessage));
-            // 数据入库
+            // 消息数据入库
             MsgRecord msgRecord = new MsgRecord();
             msgRecord.setId(UUID.randomUUID().toString());
             msgRecord.setCustomerId(userId);
             msgRecord.setServiceId(messageDto.getUserId());
-            msgRecord.setRecordTime(new Date());
-        }catch (NullPointerException e){
+            msgRecord.setRecordTime(new Date().getTime());
+            msgRecordService.saveMsgRecord(msgRecord);
+        } catch (NullPointerException e) {
             logger.info("你好，对方已离线，请留言");
             setLeaveMsg(messageDto.getUserId(), messageDto);
             AppointSending(userId, JSON.toJSONString(new MessageDto("你好，对方已离线，请留言")));
@@ -143,17 +151,24 @@ public class MyWebSocket {
 
     /**
      * 设置留言
+     *
      * @param userId
      * @param messageDto
      * @return
      */
-    private List<MessageDto> setLeaveMsg(String userId, MessageDto messageDto){
+    private List<LeaveMsg> setLeaveMsg(String userId, MessageDto messageDto) {
+        // 组装redis中的list"容器"的key值
         String lUserId = "l" + userId;
         List<Object> objectMsg = RedisUtils.lGet(lUserId, 0, -1);
-        if(CollectionUtils.isEmpty(objectMsg)){
-            List<MessageDto> leaveMsg = new ArrayList<>();
-            leaveMsg.add(messageDto);
-            RedisUtils.llSet(lUserId, leaveMsg);
+        if (CollectionUtils.isEmpty(objectMsg)) {
+            List<LeaveMsg> leaveMsgList = new ArrayList<>();
+            // 创建留言记录
+            LeaveMsg leaveMsg = new LeaveMsg(UUID.randomUUID().toString(), userId, messageDto.getMessage(), new Date().getTime(), null);
+            leaveMsgList.add(leaveMsg);
+            // 缓存留言
+            RedisUtils.llSet(lUserId, leaveMsgList);
+            // 数据入库
+            chatService.saveLeaveMsg(leaveMsg);
         }
         return null;
     }
