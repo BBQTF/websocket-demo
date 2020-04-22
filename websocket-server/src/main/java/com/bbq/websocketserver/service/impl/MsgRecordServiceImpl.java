@@ -54,10 +54,10 @@ public class MsgRecordServiceImpl implements MsgRecordService {
     @Override
     public List<String> getChats(String userId) {
         Object objects = RedisUtils.zsGet(RedisKeyPrefixEnum.SORTED_SET + userId);
-        if(objects == null){
+        if (objects == null || objects instanceof Set) {
             return null;
         }
-        Set<String> chats = (Set<String>) (Set)objects;
+        Set<String> chats = (Set<String>) (Set) objects;
         List<String> chatList = chats.stream().collect(Collectors.toList());
         return chatList;
     }
