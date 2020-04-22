@@ -25,6 +25,13 @@ public interface MsgRecordService {
     List<MsgRecord> queryMsgRecord(QueryMsgRecordDto dto);
 
     /**
+     * 获取redis中的会话列表
+     * @param userId
+     * @return
+     */
+    List<String> getChats(String userId);
+
+    /**
      * 获取redis中的离线消息
      * @param ownId
      * @param otherId

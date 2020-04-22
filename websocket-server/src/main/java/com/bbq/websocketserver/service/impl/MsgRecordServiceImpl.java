@@ -10,6 +10,10 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.bbq.websocketserver.common.utils.RedisUtils.zsGet;
 
 /**
  * @author liutf
@@ -40,6 +44,19 @@ public class MsgRecordServiceImpl implements MsgRecordService {
     @Override
     public List<MsgRecord> queryMsgRecord(QueryMsgRecordDto dto) {
         return msgRecordMapper.queryMsgRecord(dto);
+    }
+
+    /**
+     * 获取redis中的会话列表
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<String> getChats(String userId) {
+        Set<String> chatIds = (Set<String>) (Set) RedisUtils.zsGet("zs" + userId);
+        List<String> chatList = chatIds.stream().collect(Collectors.toList());
+        return chatList;
     }
 
     /**

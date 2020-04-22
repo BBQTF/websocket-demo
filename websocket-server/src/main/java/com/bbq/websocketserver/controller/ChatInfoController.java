@@ -24,6 +24,22 @@ public class ChatInfoController {
     @Resource
     MsgRecordService msgRecordService;
 
+    /**
+     * 获取redis中的会话列表
+     * @param userId
+     * @return
+     */
+    @GetMapping("/getChats")
+    @ApiOperation("获取会话列表")
+    public ApiResponse  getChats(@RequestParam String userId){
+        try{
+            return new ApiResponse<List<String>>(msgRecordService.getChats(userId));
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ApiResponse<>(ResultStatusEnum.SYSTEM_ERROR);
+        }
+    }
+
     @GetMapping("/getLeaveMsg")
     @ApiOperation("获取redis中的离线消息")
     public ApiResponse  getLeaveMsg(@RequestParam String ownId,@RequestParam String otherId){

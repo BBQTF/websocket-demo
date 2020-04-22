@@ -84,6 +84,8 @@ public class MyWebSocket {
                 this.AppointSending(userId, JSON.toJSONString(messageDto));
                 // 记录客户沟通对象
                 RedisUtils.set(userId, lowestServiceId);
+                // 缓存客服沟通对象-选择sorted set 存储
+                RedisUtils.zsSet("zs" + lowestServiceId, userId);
             } else {
                 messageDto.setUserId((String) serviceId);
                 this.AppointSending(userId, JSON.toJSONString(messageDto));
