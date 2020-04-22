@@ -1,5 +1,6 @@
 package com.bbq.websocketserver.service.impl;
 
+import com.bbq.websocketserver.common.RedisKeyPrefixEnum;
 import com.bbq.websocketserver.common.utils.RedisUtils;
 import com.bbq.websocketserver.dto.QueryMsgRecordDto;
 import com.bbq.websocketserver.entity.MsgRecord;
@@ -54,7 +55,7 @@ public class MsgRecordServiceImpl implements MsgRecordService {
      */
     @Override
     public List<String> getChats(String userId) {
-        Set<String> chatIds = (Set<String>) (Set) RedisUtils.zsGet("zs" + userId);
+        Set<String> chatIds = (Set<String>) (Set) RedisUtils.zsGet(RedisKeyPrefixEnum.SORTED_SET + userId);
         List<String> chatList = chatIds.stream().collect(Collectors.toList());
         return chatList;
     }
@@ -69,7 +70,7 @@ public class MsgRecordServiceImpl implements MsgRecordService {
     @Override
     public List<MsgRecord> getLeaveMsg(String ownId, String otherId) {
         // 组装redis中的list"容器"的key值
-        String lLey = "l" + ownId + otherId;
+        String lLey = RedisKeyPrefixEnum.LIST + ownId + otherId;
         List<Object> objectMsg = RedisUtils.lGet(lLey, 0, -1);
         if (CollectionUtils.isEmpty(objectMsg)) {
             List<MsgRecord> msgRecordList = (List<MsgRecord>) (List) objectMsg;

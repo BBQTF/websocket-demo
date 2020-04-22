@@ -2,6 +2,7 @@ package com.bbq.websocketserver.config;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.bbq.websocketserver.common.RedisKeyPrefixEnum;
 import com.bbq.websocketserver.common.utils.RedisUtils;
 import com.bbq.websocketserver.entity.MsgRecord;
 import com.bbq.websocketserver.service.MsgRecordService;
@@ -85,7 +86,7 @@ public class MyWebSocket {
                 // 记录客户沟通对象
                 RedisUtils.set(userId, lowestServiceId);
                 // 缓存客服沟通对象-选择sorted set 存储
-                RedisUtils.zsSet("zs" + lowestServiceId, userId);
+                RedisUtils.zsSet(RedisKeyPrefixEnum.SORTED_SET + lowestServiceId, userId);
             } else {
                 messageDto.setUserId((String) serviceId);
                 this.AppointSending(userId, JSON.toJSONString(messageDto));
@@ -177,7 +178,7 @@ public class MyWebSocket {
      */
     private void setLeaveMsg(MsgRecord msgRecord) {
         // 组装redis中的list"容器"的key值 l + 接收方id + 自己的id
-        String lLey = "l" + msgRecord.getOtherId() + userId;
+        String lLey = RedisKeyPrefixEnum.LIST + msgRecord.getOtherId() + userId;
         List<Object> objectMsg = RedisUtils.lGet(lLey, 0, -1);
         if (CollectionUtils.isEmpty(objectMsg)) {
             List<MsgRecord> msgRecordList = new ArrayList<>();
