@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.bbq.websocketserver.common.utils.RedisUtils.zsGet;
-
 /**
  * @author liutf
  * @date 2020-04-21
@@ -55,8 +53,12 @@ public class MsgRecordServiceImpl implements MsgRecordService {
      */
     @Override
     public List<String> getChats(String userId) {
-        Set<String> chatIds = (Set<String>) (Set) RedisUtils.zsGet(RedisKeyPrefixEnum.SORTED_SET + userId);
-        List<String> chatList = chatIds.stream().collect(Collectors.toList());
+        Object objects = RedisUtils.zsGet(RedisKeyPrefixEnum.SORTED_SET + userId);
+        if(objects == null){
+            return null;
+        }
+        Set<String> chats = (Set<String>) (Set)objects;
+        List<String> chatList = chats.stream().collect(Collectors.toList());
         return chatList;
     }
 
