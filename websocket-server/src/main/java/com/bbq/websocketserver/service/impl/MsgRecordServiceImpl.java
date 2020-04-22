@@ -53,7 +53,7 @@ public class MsgRecordServiceImpl implements MsgRecordService {
      */
     @Override
     public List<String> getChats(String userId) {
-        Object objects = RedisUtils.zsGet(RedisKeyPrefixEnum.SORTED_SET + userId);
+        Object objects = RedisUtils.zsGet(RedisKeyPrefixEnum.SORTED_SET.getKeyName() + userId);
         if (objects == null || objects instanceof Set) {
             return null;
         }
@@ -72,7 +72,7 @@ public class MsgRecordServiceImpl implements MsgRecordService {
     @Override
     public List<MsgRecord> getLeaveMsg(String ownId, String otherId) {
         // 组装redis中的list"容器"的key值
-        String lLey = RedisKeyPrefixEnum.LIST + ownId + otherId;
+        String lLey = RedisKeyPrefixEnum.LIST.getKeyName() + ownId + otherId;
         List<Object> objectMsg = RedisUtils.lGet(lLey, 0, -1);
         if (CollectionUtils.isEmpty(objectMsg)) {
             List<MsgRecord> msgRecordList = (List<MsgRecord>) (List) objectMsg;

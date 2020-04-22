@@ -80,13 +80,14 @@ public class MyWebSocket {
             if (serviceId == null) {
                 // 查询当前处理会话数最低的客服userId
                 String lowestServiceId = "test"; // TODO 暂时写死，应从redis或数据库中获取
+                // httpSession.getAttribute("user");
                 // 为客户分配对应的客服
                 messageDto.setUserId(lowestServiceId);
                 this.AppointSending(userId, JSON.toJSONString(messageDto));
                 // 记录客户沟通对象
                 RedisUtils.set(userId, lowestServiceId);
-                // 缓存客服沟通对象-选择sorted set 存储
-                RedisUtils.zsSet(RedisKeyPrefixEnum.SORTED_SET + lowestServiceId, userId);
+                // 缓存客服沟通对象-选择sorted set 存储  TODO 缓存httpSession.getAttribute("user")
+                RedisUtils.zsSet(RedisKeyPrefixEnum.SORTED_SET.getKeyName() + lowestServiceId, userId);
             } else {
                 messageDto.setUserId((String) serviceId);
                 this.AppointSending(userId, JSON.toJSONString(messageDto));
@@ -178,7 +179,7 @@ public class MyWebSocket {
      */
     private void setLeaveMsg(MsgRecord msgRecord) {
         // 组装redis中的list"容器"的key值 l + 接收方id + 自己的id
-        String lLey = RedisKeyPrefixEnum.LIST + msgRecord.getOtherId() + userId;
+        String lLey = RedisKeyPrefixEnum.LIST.getKeyName()+ msgRecord.getOtherId() + userId;
         List<Object> objectMsg = RedisUtils.lGet(lLey, 0, -1);
         if (CollectionUtils.isEmpty(objectMsg)) {
             List<MsgRecord> msgRecordList = new ArrayList<>();
