@@ -31,7 +31,7 @@ public class MsgRecordServiceImpl implements MsgRecordService {
      */
     @Override
     public int saveMsgRecord(MsgRecord msgRecord) {
-        return saveMsgRecord(msgRecord);
+        return msgRecordMapper.saveMsgRecord(msgRecord);
     }
 
     /**
