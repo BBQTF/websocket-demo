@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author liutf
@@ -36,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MyWebSocket {
 
     //静态变量，用来记录当前在线连接数
+    // public static AtomicInteger count = new AtomicInteger(0); //线程安全
     private static int onlineCount = 0;
 
     //根据用户标识存放每个客户端对应的MyWebSocket对象
@@ -118,6 +120,7 @@ public class MyWebSocket {
         MsgRecord msgRecord = transToMsgRecord(message);
         try {
             logger.info("收到客户端传来的消息---：" + message);
+            logger.info(msgRecord.toString());
             // 指定userId发送消息&&也将自己的userId保存在messageDto中发送给对方
             MessageDto messageDto = new MessageDto();
             messageDto.setUserId(userId);
