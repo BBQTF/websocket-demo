@@ -1,4 +1,4 @@
-package com.bbq.websocketclient.config;
+package com.example.demo.config;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
@@ -17,13 +17,12 @@ public class WebSocketClientConfig {
     private static Logger log = LoggerFactory.getLogger(WebSocketClientConfig.class);
 
     // 获取当前用户Id
-    String userId = "test";
+    String userId = "tt";
 
     @Bean
     public WebSocketClient WebSocketClient() {
         try {
-            //WebSocketClient webSocketClient = new WebSocketClient(new URI("ws://192.168.1.153:8084/productWebSocket/001"), new Draft_6455()) {
-            WebSocketClient webSocketClient = new WebSocketClient(new URI("ws://172.20.10.3:9093/pushServer/" + userId), new Draft_6455()) {
+            WebSocketClient webSocketClient = new WebSocketClient(new URI("ws://123.56.141.39:8848/websocket/" + userId), new Draft_6455()) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
                     log.info("[websocket] 连接成功");
@@ -37,8 +36,6 @@ public class WebSocketClientConfig {
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    log.info(code + "");
-                    log.info(reason);
                     log.info("[websocket] 退出连接");
                 }
 
