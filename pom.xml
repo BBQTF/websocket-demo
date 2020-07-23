@@ -11,5 +11,6 @@
     <modules>
         <module>websocket-client</module>
         <module>websocket-server</module>
+        <module>test-client</module>
     </modules>
 </project>
